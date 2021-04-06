@@ -447,6 +447,24 @@
                     },
                     "Subnet2StartAddress": {
                         "value": "[parameters('Subnet2StartAddress')]"
+                    },
+					"Subnet3Name": {
+                        "value": "[parameters('Subnet3Name')]"
+                    },
+                    "Subnet3Prefix": {
+                        "value": "[parameters('Subnet3Prefix')]"
+                    },
+                    "Subnet3StartAddress": {
+                        "value": "[parameters('Subnet3StartAddress')]"
+                    },
+                    "Subnet4Name": {
+                        "value": "[parameters('Subnet4Name')]"
+                    },
+                    "Subnet4Prefix": {
+                        "value": "[parameters('Subnet4Prefix')]"
+                    },
+                    "Subnet4StartAddress": {
+                        "value": "[parameters('Subnet4StartAddress')]"
                     }
                 }
             }

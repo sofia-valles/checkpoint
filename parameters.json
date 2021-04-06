@@ -47,9 +47,6 @@
         "Subnet2StartAddress": {
             "value": "10.20.1.4"
         },
-        "vnetNewOrExisting": {
-            "value": "new"
-        },
         "virtualNetworkExistingRGName": {
             "value": "RG_Sofia.Valles"
         },
