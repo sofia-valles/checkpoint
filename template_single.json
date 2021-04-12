@@ -134,6 +134,48 @@
       },
       "defaultValue": "10.0.2.10"
     },
+	"Subnet3Name": {
+      "type": "string",
+      "metadata": {
+        "description": "The name of the 3rd subnet"
+      },
+      "defaultValue": "ProtectedSubnet1"
+    },
+    "Subnet3Prefix": {
+      "type": "string",
+      "metadata": {
+        "description": "The address prefix of the 3rd subnet"
+      },
+      "defaultValue": "10.0.3.0/24"
+    },
+    "Subnet3StartAddress": {
+      "type": "string",
+      "metadata": {
+        "description": "The first available address on the 3rd subnet"
+      },
+      "defaultValue": "10.0.3.10"
+    },
+	"Subnet4Name": {
+      "type": "string",
+      "metadata": {
+        "description": "The name of the 4th subnet"
+      },
+      "defaultValue": "ProtectedSubnet2"
+    },
+    "Subnet4Prefix": {
+      "type": "string",
+      "metadata": {
+        "description": "The address prefix of the 4th subnet"
+      },
+      "defaultValue": "10.0.4.0/24"
+    },
+    "Subnet4StartAddress": {
+      "type": "string",
+      "metadata": {
+        "description": "The first available address on the 4th subnet"
+      },
+      "defaultValue": "10.0.4.10"
+    },
     "vnetNewOrExisting": {
       "type": "string",
       "defaultValue": "new",
@@ -378,7 +420,11 @@
     "sicKey": "[parameters('sicKey')]",
     "managementGUIClientNetwork": "[parameters('managementGUIClientNetwork')]",
     "vmID": "[resourceId('Microsoft.Compute/virtualMachines', parameters('vmName'))]",
-    "customMetrics": "[parameters('customMetrics')]",
+    "routeTableProtected1Name": "[concat(parameters('virtualNetworkName'),'-PROTECTED-1-udr')]",
+    "routeTableProtected1Id": "[resourceId('Microsoft.Network/routeTables',variables('routeTableProtected1Name'))]",
+    "routeTableProtected2Name": "[concat(parameters('virtualNetworkName'),'-PROTECTED-2-udr')]",
+    "routeTableProtected2Id": "[resourceId('Microsoft.Network/routeTables',variables('routeTableProtected2Name'))]",
+	"customMetrics": "[parameters('customMetrics')]",
     "identity": "[json('{\"type\": \"SystemAssigned\"}')]",
     "monitoringMetricsPublisher": "[concat('/subscriptions/', parameters('subscriptionId'), '/providers/Microsoft.Authorization/roleDefinitions/', '3913510d-42f4-4e42-8a64-420c390055eb')]"
   },
@@ -414,6 +460,10 @@
       "name": "networkNewSetup",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2020-06-01",
+	  "dependsOn": [
+        "[variables('routeTableProtected1Id')]",
+        "[variables('routeTableProtected2Id')]"
+      ],
       "properties": {
         "mode": "Incremental",
         "templateLink": {
@@ -447,7 +497,31 @@
           },
           "Subnet2StartAddress": {
             "value": "[parameters('Subnet2StartAddress')]"
-          }
+          },
+		  "Subnet3Name": {
+            "value": "[parameters('Subnet3Name')]"
+          },
+          "Subnet3Prefix": {
+            "value": "[parameters('Subnet3Prefix')]"
+          },
+          "Subnet3StartAddress": {
+            "value": "[parameters('Subnet3StartAddress')]"
+          },
+		  "routetableID1":{
+			"value": "[variables('routeTableProtected1Id')]"
+		  },
+          "Subnet4Name": {
+            "value": "[parameters('Subnet4Name')]"
+          },
+          "Subnet4Prefix": {
+            "value": "[parameters('Subnet4Prefix')]"
+          },
+          "Subnet4StartAddress": {
+            "value": "[parameters('Subnet4StartAddress')]"
+          },
+		  "routetableID2":{
+			"value": "[variables('routeTableProtected2Id')]"
+		  }
         }
       }
     },
@@ -643,7 +717,73 @@
           "scope":"[resourceGroup().id]"
         },
         "dependsOn": ["[variables('vmID')]"]
-    }
+    },
+	{
+            "type": "Microsoft.Network/routeTables",
+            "name": "[variables('routeTableProtected1Name')]",
+            "apiVersion": "2020-04-01",
+            "location": "[parameters('location')]",
+            "properties": {
+                "routes": [
+                    {
+                        "name": "local",
+                        "properties": {
+                            "addressPrefix": "[parameters('subnet3Prefix')]",
+                            "nextHopType": "VnetLocal"
+                        }
+                    },
+					{
+                        "name": "default",
+                        "properties": {
+                            "addressPrefix": "0.0.0.0/0",
+                            "nextHopType": "VirtualAppliance",
+                            "nextHopIpAddress": "[parameters('subnet2StartAddress')]"
+                        }
+                    },
+					{
+                        "name": "To-other-subnets",
+                        "properties": {
+                            "addressPrefix": "[parameters('virtualNetworkAddressPrefix')]",
+                            "nextHopType": "VirtualAppliance",
+                            "nextHopIpAddress": "[parameters('subnet2StartAddress')]"
+                        }
+                    }
+                ]
+            }
+        },
+		{
+            "type": "Microsoft.Network/routeTables",
+            "name": "[variables('routeTableProtected2Name')]",
+            "apiVersion": "2020-04-01",
+            "location": "[parameters('location')]",
+            "properties": {
+                "routes": [
+                    {
+                        "name": "local",
+                        "properties": {
+                            "addressPrefix": "[parameters('subnet4Prefix')]",
+                            "nextHopType": "VnetLocal"
+                        }
+                    },
+					{
+                        "name": "default",
+                        "properties": {
+                            "addressPrefix": "0.0.0.0/0",
+                            "nextHopType": "VirtualAppliance",
+                            "nextHopIpAddress": "[parameters('subnet2StartAddress')]"
+                        }
+                    },
+					{
+                        "name": "To-other-subnets",
+                        "properties": {
+                            "addressPrefix": "[parameters('virtualNetworkAddressPrefix')]",
+                            "nextHopType": "VirtualAppliance",
+                            "nextHopIpAddress": "[parameters('subnet2StartAddress')]"
+                        }
+                    }
+                ]
+            }
+        }
   ],
   "outputs": {
     "GatewayIPAddr": {

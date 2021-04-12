@@ -47,6 +47,24 @@
         "Subnet2StartAddress": {
             "value": "10.20.1.4"
         },
+		"Subnet3Name": {
+            "value": "ProtectedSubnet1"
+        },
+        "Subnet3Prefix": {
+            "value": "10.20.2.0/24"
+        },
+        "Subnet3StartAddress": {
+            "value": "10.20.2.4"
+        },
+		"Subnet4Name": {
+            "value": "ProtectedSubnet2"
+        },
+        "Subnet4Prefix": {
+            "value": "10.20.3.0/24"
+        },
+        "Subnet4StartAddress": {
+            "value": "10.20.3.4"
+        },
         "virtualNetworkExistingRGName": {
             "value": "RG_Sofia.Valles"
         },
